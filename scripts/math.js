@@ -9,6 +9,7 @@ async function main() {
   console.log(await math.max(13, 5));
   console.log(await math.min(4, 17));
   console.log(await math.min(17, 1));
+  console.log(await math.sum([]));
 }
 
 main()

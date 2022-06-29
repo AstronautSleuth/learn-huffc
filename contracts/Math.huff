@@ -1,6 +1,7 @@
 /* Interface */
 #define function max(uint256,uint256) pure returns (uint256)
 #define function min(uint256,uint256) pure returns (uint256)
+#define function sum(uint256[]) pure returns (uint256)
 // #define function average(uint256[]) pure returns (uint256)
 // #define function ceilDiv(uint256,uint256) pure returns (uint256)
 // #define function sqrt(uint256) pure returns (uint256)
@@ -30,13 +31,67 @@
     pop                     // [a]
     0x00 mstore             // [], {a}
     0x20 0x00 return        // [], {a}
-    b:                      // [b, a], {}
+    b:                      // [b, a]3, {}
         0x00 mstore         // [a], {b}
         0x20 0x00 return    // [a], {b}
 }
-#define macro AVERAGE() = takes(0) returns (0) {
-    
+// Will overflow
+#define macro SUM() = takes(0) returns(0) {
+    // sum([])
+    0x04 calldatasize           // [0x04, calldatasize]
+    eq                          // [0x04 == calldatasize]
+    zero jumpi
+
+    zero:
+        0x00 0x00 mstore        // [], {0}
+        0x20 0x00 return
 }
+// Will overflow
+// #define macro AVERAGE() = takes(0) returns (0) {
+//     // average([])
+//     calldatasize            // [size]
+//     0x04                    // [4, size]
+//     eq                      // [4==size]
+//     zero jumpi              /// []
+
+//     // average([a])
+//     calldatasize            // [size]
+//     0x24                    // [0x24, size]
+//     eq                      // [0x24==size]
+//     one jumpi               // []
+
+//     // average([a...b])
+//     calldatasize            // [size]
+//                             // [count, pos,  sum, size]
+//     0x00 0x04 0x00          // [0x00, 0x04, 0x00, size]
+//     loop jumpi
+//     // compare 0x24 and size, if 1 then jump
+//     loop:
+//         0x01 add            // [0x01, 0x04, 0x00, size]
+//         swap1               // [0x04, 0x01, 0x00, size]
+//         dup1 calldataload   // [a, 0x04, 0x01, 0x00, size]
+//         dup4 add            // [a+0x00, 0x04, 0x01, 0x00, size]
+//         swap1               // [0x04, a+0x00, 0x01, 0x00, size]
+//         0x20 add            // [0x24, a+0x00, 0x01, 0x00, size]
+//         swap3               // [0x00, 0x24, a+0x00, 0x01, size]
+        
+//         swap2               // [0x00, 0x01, 0x24, size]
+//         dup3 add            // [0x24, 0x01, 0x24, size]
+
+
+
+//         end jumpi
+
+//     zero:
+//         0x00 0x00 mstore    // [], {0}
+//         0x20 0x00 return
+//     one:
+//         0x04 calldataload   // [a], {}
+//         0x00 mstore         // [], {a}
+//         0x20 0x00 return
+//     end:
+
+// }
 // #define macro CEIL_DIV() = takes(0) returns (0) {
     
 // }
@@ -50,7 +105,8 @@
 
     dup1 0x6d5433e6 eq max jumpi
     dup1 0x7ae2b5c7 eq min jumpi
-    // dup1 0xa8606b82 eq AVERAGE() jumpi
+    dup1 0x0194db8e eq sum jumpi
+    // dup1 0xa8606b82 eq avg jumpi
     // dup1 0x9cb35327 eq CEIL_DIV() jumpi
     // dup1 0x677342ce eq SQRT() jumpi
 
@@ -58,4 +114,6 @@
         MAX()
     min:
         MIN()
+    sum:
+        SUM()
 }
